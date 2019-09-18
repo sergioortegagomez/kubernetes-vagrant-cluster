@@ -4,8 +4,8 @@ function main() {
     vagrant up
 }
 
-if [ $# == 0 ]; then
+function help() {
     echo " - up: platform up!! :) "
-else
-    main $@ 
-fi
+}
+
+[ $# == 0 ] && help || main

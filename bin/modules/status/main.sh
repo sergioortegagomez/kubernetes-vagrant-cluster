@@ -4,8 +4,8 @@ function main() {
     vagrant status
 }
 
-if [ $# == 0 ]; then
+function help() {
     echo " - status: Current Platform status"
-else
-    main $@ 
-fi
+}
+
+[ $# == 0 ] && help || main

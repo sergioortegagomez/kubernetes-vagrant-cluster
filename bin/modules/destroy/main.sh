@@ -4,8 +4,8 @@ function main() {
     vagrant destroy -f
 }
 
-if [ $# == 0 ]; then
+function help() {
     echo " - destroy: destroy your platform!!"
-else
-    main $@ 
-fi
+}
+
+[ $# == 0 ] && help || main

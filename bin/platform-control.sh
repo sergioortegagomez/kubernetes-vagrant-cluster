@@ -6,8 +6,4 @@ source modules/common.sh
 
 printHead
 
-if [ $# == 0 ]; then
-    help
-else
-    execute-module $@ 
-fi
+[ $# == 0 ] && help || execute-module $@
