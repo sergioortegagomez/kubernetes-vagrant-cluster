@@ -5,7 +5,7 @@ function main() {
 }
 
 function help() {
-    echo " - status: Current Platform status"
+    echo " - status: current status"
 }
 
 [ $# == 0 ] && help || main
