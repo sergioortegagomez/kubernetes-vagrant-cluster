@@ -5,7 +5,7 @@ function main() {
 }
 
 function help() {
-    echo " - destroy: destroy and remove all vm"
+    echo " - destroy: destroy and remove all vms"
 }
 
 [ $# == 0 ] && help || main
