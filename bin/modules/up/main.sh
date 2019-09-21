@@ -19,6 +19,11 @@ function clusterStart() {
     echo 'touch .deployed' | vagrant ssh k8s-master
 }
 
+function dashboardDeploy() {
+    echo 'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommended.yaml' | vagrant ssh k8s-master
+    echo "kubectl proxy --accept-hosts='^localhost$,^127\.0\.0\.1$,^\[::1\]$' &" | vagrant ssh k8s-master
+}
+
 function main() {
     vagrant up
 
@@ -27,6 +32,7 @@ function main() {
     if [ ${IS_DEPLOYED} == 0 ]; then
         bash platform-control.sh restart
         clusterStart
+        # dashboardDeploy
     fi
 
     bash platform-control.sh status
