@@ -7,6 +7,7 @@ function main() {
         IS_DEPLOYED=$(echo 'ls -la' | vagrant ssh k8s-master | grep deployed | wc -l)
         if [ ${IS_DEPLOYED} == 1 ]; then
             echo 'kubectl get nodes -o wide' | vagrant ssh k8s-master
+            echo 'kubectl cluster-info' | vagrant ssh k8s-master
         fi
     fi
 }
