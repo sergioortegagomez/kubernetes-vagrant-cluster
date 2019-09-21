@@ -39,6 +39,10 @@ k8s-node-2   NotReady   <none>   2m36s   v1.16.0   <none>          <none>       
 k8s-node-3   NotReady   <none>   2m17s   v1.16.0   <none>          <none>        Debian GNU/Linux 8 (jessie)   3.16.0-9-amd64   docker://18.6.3
 k8s-node-4   NotReady   <none>   118s    v1.16.0   <none>          <none>        Debian GNU/Linux 8 (jessie)   3.16.0-9-amd64   docker://18.6.3
 k8s-node-5   NotReady   <none>   98s     v1.16.0   <none>          <none>        Debian GNU/Linux 8 (jessie)   3.16.0-9-amd64   docker://18.6.3
+
+Kubernetes master is running at https://192.168.10.10:6443
+KubeDNS is running at https://192.168.10.10:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
 ```
 
 Enjoy!!
