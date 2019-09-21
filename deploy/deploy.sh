@@ -1,6 +1,4 @@
 #!/bin/bash
-
-PRIVATE_NETWORK_IP=$(sudo ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
     
 function printTitle() {
     echo "=================================================="
@@ -11,7 +9,7 @@ function printTitle() {
 function dockerInstall() {
     printTitle "Docker Install"
     sudo apt-get update
-    sudo apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+    sudo apt-get -y install apt-transport-https ca-certificates vim curl gnupg2 software-properties-common
     curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     sudo apt-get update
@@ -21,7 +19,7 @@ function dockerInstall() {
 
 # Disabled SWAP
 function disableSWAP() {
-    printTitle "Disables SWAP"
+    printTitle "Disable SWAP"
     swapoff -a
     LINE=$(sudo cat /etc/fstab | grep swap | grep -v "#")
     sudo sed -i "s#$LINE#\#$LINE#g" /etc/fstab
@@ -36,24 +34,24 @@ function kubeInstall() {
     sudo add-apt-repository "deb https://apt.kubernetes.io/ kubernetes-xenial main"
     sudo apt-get update
     sudo apt-get -y install kubelet kubeadm kubectl
-    echo "KUBELET_EXTRA_ARGS=--node-ip=$PRIVATE_NETWORK_IP" > /etc/default/kubelet
-    sudo service kubelet restart
-    sudo kubelet --version
+    sudo apt-mark hold kubelet kubeadm kubectl
+    echo "KUBELET_EXTRA_ARGS=--node-ip=192.168.10.10" > /etc/default/kubelet
 }
 
-# Service KubeAdm Start
-function startKubeAdm() {
-    IP_PART1=$(echo $PRIVATE_NETWORK_IP | tr '.' ' ' | awk '{ print $1 }')
-    IP_PART2=$(echo $PRIVATE_NETWORK_IP | tr '.' ' ' | awk '{ print $2 }')
-    sudo kubeadm init --apiserver-advertise-address="$PRIVATE_NETWORK_IP" --apiserver-cert-extra-sans="$PRIVATE_NETWORK_IP"  --node-name k8s-master --pod-network-cidr=$IP_PART1.$IP_PART2.0.0/16
+# Enable cgroups memory for default Jessie image.
+function enableCgroupsMemory() {
+    printTitle "Enable Cgroups Memory"
+    sudo sed -i "s#quiet#quiet cgroup_enable=memory swapaccount=1#g" /etc/default/grub
+    sudo update-grub2
 }
+
 
 # main
 function main() {
     dockerInstall
     disableSWAP
     kubeInstall
-    startKubeAdm
+    enableCgroupsMemory
 }
 
 main
