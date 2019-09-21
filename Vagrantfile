@@ -11,16 +11,16 @@ Vagrant.configure("2") do |config|
     master.vm.box = "debian/jessie64"
     master.vm.network "private_network", ip: "192.168.10.10"
     master.vm.hostname = "k8s-master"
-    master.vm.provision :shell, path: "deploy/master.sh"
+    master.vm.provision :shell, path: "deploy/deploy.sh"
   end
   
   # K8s Nodes
   (1..5).each do |i|
     config.vm.define "node-#{i}" do |node|
       node.vm.box = "debian/jessie64"
-      node.vm.network "private_network", ip: "192.168.10.#{i + 10}"
+      node.vm.network "private_network", ip: "192.168.10.1#{i + 10}"
       node.vm.hostname = "k8s-node-#{i}"
-      node.vm.provision :shell, path: "deploy/node.sh"
+      node.vm.provision :shell, path: "deploy/deploy.sh"
     end
   end
 
