@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
   (1..5).each do |i|
     config.vm.define "node-#{i}" do |node|
       node.vm.box = "debian/jessie64"
-      node.vm.network "private_network", ip: "192.168.10.1#{i + 10}"
+      node.vm.network "private_network", ip: "192.168.10.#{i + 10}"
       node.vm.hostname = "k8s-node-#{i}"
       node.vm.provision :shell, path: "deploy/deploy.sh"
     end
