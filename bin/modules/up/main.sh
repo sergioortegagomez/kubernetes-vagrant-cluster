@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function ec() {
-    echo "| Execute $2 command: $1"
+    echo -e "\033[0;32m| Execute $2 command:\033[0;33m $1 \033[0m"
     echo "$1" | vagrant ssh $2
 }
 
@@ -10,14 +10,13 @@ function getNetworkIps() {
     PRIVATE_NETWORK_IP_PART1=$(echo $PRIVATE_NETWORK_IP | tr '.' ' ' | awk '{print $1}')
     PRIVATE_NETWORK_IP_PART2=$(echo $PRIVATE_NETWORK_IP | tr '.' ' ' | awk '{print $2}')
 
-    PRIVATE_SUBNETWORK_IP=$(echo "sudo ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'" | vagrant ssh k8s-master | tail -n 1 | awk '{print $1}')
-    PRIVATE_SUBNETWORK_IP_PART1=$(echo $PRIVATE_SUBNETWORK_IP | tr '.' ' ' | awk '{print $1}')
-    PRIVATE_SUBNETWORK_IP_PART2=$(echo $PRIVATE_SUBNETWORK_IP | tr '.' ' ' | awk '{print $2}')
+    PRIVATE_SUBNETWORK_IP_PART1=15
+    PRIVATE_SUBNETWORK_IP_PART2=15
 }
 
 function clusterStart() {
     # Service KubeAdm Start
-    ec "sudo kubeadm init --apiserver-advertise-address=$PRIVATE_NETWORK_IP_PART1.$PRIVATE_NETWORK_IP_PART2.10.10 --apiserver-cert-extra-sans=$PRIVATE_NETWORK_IP_PART1.$PRIVATE_NETWORK_IP_PART2.10.10 --node-name k8s-master --pod-network-cidr=$PRIVATE_SUBNETWORK_IP_PART1.$PRIVATE_SUBNETWORK_IP_PART2.0.0/16" k8s-master
+    ec "sudo kubeadm init --apiserver-advertise-address=$PRIVATE_NETWORK_IP_PART1.$PRIVATE_NETWORK_IP_PART2.10.10 --pod-network-cidr=$PRIVATE_SUBNETWORK_IP_PART1.$PRIVATE_SUBNETWORK_IP_PART2.0.0/16" k8s-master
 
     # Create vagrant user conf
     ec 'mkdir -p $HOME/.kube' k8s-master
@@ -26,7 +25,8 @@ function clusterStart() {
 
     # Join Nodes to Kuberneter
     KUBEADM_JOIN_COMMAND=$(echo 'kubeadm token create --print-join-command' | vagrant ssh k8s-master | grep kubeadm)
-    for i in `seq 1 5`; do
+    VM_NODES_COUNT=$(vagrant status | grep node- | wc -l)
+    for i in `seq 1 $VM_NODES_COUNT`; do
         ec "sudo $KUBEADM_JOIN_COMMAND" node-$i
     done
 
@@ -41,9 +41,9 @@ function calicoNetworkDeploy() {
     sleep 5
     PODS_CALICO_COUNT=$(echo "kubectl get pods -o wide --all-namespaces | grep calico | wc -l" | vagrant ssh k8s-master | tail -n 1)
     PODS_CALICO_RUNNING=0
-    echo -e "Waiting for calico"
+    echo -e "Waiting for calico (aprox 10 minutes)"
     while [ $PODS_CALICO_RUNNING -lt $PODS_CALICO_COUNT ]; do
-        sleep 1
+        sleep 5
         PODS_CALICO_RUNNING=$(echo "kubectl get pods -o wide --all-namespaces | grep calico | grep Running | wc -l" | vagrant ssh k8s-master | tail -n 1)
         echo -n "."
     done
@@ -53,7 +53,7 @@ function calicoNetworkDeploy() {
 
 function dashboardDeploy() {
     ec 'kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/alternative/kubernetes-dashboard.yaml' k8s-master
-    #echo "kubectl proxy --address 0.0.0.0 --accept-hosts '.*' &" | vagrant ssh k8s-master
+    ec "kubectl proxy --address 0.0.0.0 --accept-hosts '.*' &" k8s-master
 }
 
 function main() {
