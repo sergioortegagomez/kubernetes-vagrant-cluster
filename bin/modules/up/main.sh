@@ -1,8 +1,18 @@
 #!/bin/bash
 
+function getNetworkIps() {
+    PRIVATE_NETWORK_IP=$(echo "sudo ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'" | vagrant ssh k8s-master | tail -n 1 | awk '{print $1}')
+    PRIVATE_NETWORK_IP_PART1=$(echo $PRIVATE_NETWORK_IP | tr '.' ' ' | awk '{print $1}')
+    PRIVATE_NETWORK_IP_PART2=$(echo $PRIVATE_NETWORK_IP | tr '.' ' ' | awk '{print $2}')
+
+    PRIVATE_SUBNETWORK_IP=$(echo "sudo ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'" | vagrant ssh k8s-master | tail -n 1 | awk '{print $1}')
+    PRIVATE_SUBNETWORK_IP_PART1=$(echo $PRIVATE_SUBNETWORK_IP | tr '.' ' ' | awk '{print $1}')
+    PRIVATE_SUBNETWORK_IP_PART2=$(echo $PRIVATE_SUBNETWORK_IP | tr '.' ' ' | awk '{print $2}')
+}
+
 function clusterStart() {
     # Service KubeAdm Start
-    echo "sudo kubeadm init --apiserver-advertise-address=192.168.10.10 --apiserver-cert-extra-sans=192.168.10.10  --node-name k8s-master --pod-network-cidr=192.168.0.0/16" | vagrant ssh k8s-master
+    echo "sudo kubeadm init --node-name k8s-master --pod-network-cidr=$PRIVATE_SUBNETWORK_IP_PART1.$PRIVATE_SUBNETWORK_IP_PART2.0.0/16" | vagrant ssh k8s-master
 
     # Create vagrant user conf
     echo 'mkdir -p $HOME/.kube' | vagrant ssh k8s-master
@@ -19,9 +29,26 @@ function clusterStart() {
     echo 'touch .deployed' | vagrant ssh k8s-master
 }
 
+function calicoNetworkDeploy() {
+    echo 'wget https://docs.projectcalico.org/v3.9/manifests/calico.yaml' | vagrant ssh k8s-master
+    echo "sed -i \"s#192.168#$PRIVATE_SUBNETWORK_IP_PART1.$PRIVATE_SUBNETWORK_IP_PART2#g\" calico.yaml" | vagrant ssh k8s-master
+    echo 'kubectl apply -f https://docs.projectcalico.org/v3.9/manifests/calico.yaml' | vagrant ssh k8s-master
+    sleep 5
+    PODS_CALICO_COUNT=$(echo "kubectl get pods -o wide --all-namespaces | grep calico | wc -l" | vagrant ssh k8s-master | tail -n 1)
+    PODS_CALICO_RUNNING=0
+    echo -e "Waiting for calico"
+    while [ $PODS_CALICO_RUNNING -lt $PODS_CALICO_COUNT ]; do
+        sleep 1
+        PODS_CALICO_RUNNING=$(echo "kubectl get pods -o wide --all-namespaces | grep calico | grep Running | wc -l" | vagrant ssh k8s-master | tail -n 1)
+        echo -n "."
+    done
+    echo -e ""
+    echo "kubectl taint nodes --all node-role.kubernetes.io/master-" | vagrant ssh k8s-master
+}
+
 function dashboardDeploy() {
-    echo 'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommended.yaml' | vagrant ssh k8s-master
-    echo "kubectl proxy --accept-hosts='^localhost$,^127\.0\.0\.1$,^\[::1\]$' &" | vagrant ssh k8s-master
+    echo 'kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/alternative/kubernetes-dashboard.yaml' | vagrant ssh k8s-master
+    echo "kubectl proxy --address 0.0.0.0 --accept-hosts '.*' &" | vagrant ssh k8s-master
 }
 
 function main() {
@@ -31,8 +58,10 @@ function main() {
     IS_DEPLOYED=$(echo 'ls -la' | vagrant ssh k8s-master | grep deployed | wc -l)
     if [ ${IS_DEPLOYED} == 0 ]; then
         bash platform-control.sh restart
+        getNetworkIps
         clusterStart
-        # dashboardDeploy
+        calicoNetworkDeploy
+        dashboardDeploy
     fi
 
     bash platform-control.sh status

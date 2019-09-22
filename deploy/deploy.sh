@@ -1,4 +1,6 @@
 #!/bin/bash
+
+PRIVATE_NETWORK_IP=$(sudo ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
     
 function printTitle() {
     echo "=================================================="
@@ -35,7 +37,7 @@ function kubeInstall() {
     sudo apt-get update
     sudo apt-get -y install kubelet kubeadm kubectl
     sudo apt-mark hold kubelet kubeadm kubectl
-    echo "KUBELET_EXTRA_ARGS=--node-ip=192.168.10.10" > /etc/default/kubelet
+    echo "KUBELET_EXTRA_ARGS=--node-ip=$PRIVATE_NETWORK_IP" > /etc/default/kubelet
 }
 
 # Enable cgroups memory for default Jessie image.
