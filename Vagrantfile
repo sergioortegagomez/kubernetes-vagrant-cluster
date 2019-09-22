@@ -3,7 +3,7 @@ Vagrant.configure("2") do |config|
   #Hardware configuration
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "1024"
-    vb.cpus = "2"
+    vb.cpus = "4"
   end
 
   # K8s Master
