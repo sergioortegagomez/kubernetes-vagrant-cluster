@@ -16,17 +16,15 @@ function dockerInstall() {
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     sudo apt-get update
     sudo apt-get -y install docker-ce
-    sudo usermod -aG docker vagrant
+    sudo usermod -aG docker vagrant    
 }
 
 # Disabled SWAP
 function disableSWAP() {
     printTitle "Disable SWAP"
+    sed -i '/swap/d' /etc/fstab
     swapoff -a
-    LINE=$(sudo cat /etc/fstab | grep swap | grep -v "#")
-    sudo sed -i "s#$LINE#\#$LINE#g" /etc/fstab
-    mount -a
-    free -h
+    mount -a    
 }
 
 # Kube* Install
@@ -46,7 +44,6 @@ function enableCgroupsMemory() {
     sudo sed -i "s#quiet#quiet cgroup_enable=memory swapaccount=1#g" /etc/default/grub
     sudo update-grub2
 }
-
 
 # main
 function main() {
