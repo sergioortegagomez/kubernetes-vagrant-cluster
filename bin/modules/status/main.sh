@@ -6,12 +6,11 @@ function main() {
     if [ "${IS_K8SMASTER_RUNNING}" == "running" ]; then
         IS_DEPLOYED=$(echo 'ls -la' | vagrant ssh k8s-master | grep deployed | wc -l)
         if [ ${IS_DEPLOYED} == 1 ]; then
-            echo -e "[ Nodes ]"
-            vagrant ssh k8s-master -- 'kubectl get nodes --all-namespaces -o wide'
-            echo -e "[ Pods ]"
-            vagrant ssh k8s-master -- 'kubectl get pods --all-namespaces -o wide'
-            echo -e "[ Services ]"
-            vagrant ssh k8s-master -- 'kubectl get services --all-namespaces -o wide'
+            for t in nodes pods services; do
+                echo
+                echo -e "[ $t ]"
+                vagrant ssh k8s-master -- "kubectl get $t --all-namespaces -o wide"
+            done
         fi
     fi
 }
