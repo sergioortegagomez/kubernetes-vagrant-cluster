@@ -2,7 +2,7 @@
 
 function printHead() {
     echo
-    echo "Kubernetes Vagrant Debian Cluster Platform Control Script"
+    echo "Kubernetes Vagrant Cluster Platform Control Script"
     echo
 }
 
