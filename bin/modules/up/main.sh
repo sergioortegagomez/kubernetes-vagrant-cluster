@@ -39,7 +39,6 @@ function clusterStart() {
 }
 
 function joinCluster() {
-    # Join Nodes to Kuberneter
     KUBEADM_JOIN_COMMAND=$(echo 'kubeadm token create --print-join-command' | vagrant ssh k8s-master | grep kubeadm)
     VM_NODES_COUNT=$(vagrant status | grep k8s-node- | wc -l)
     for i in `seq 1 $VM_NODES_COUNT`; do
@@ -52,7 +51,6 @@ function weaveNetworkDeploy() {
 }
 
 function dashboardDeploy() {
-    ec k8s-master 'kubectl create deployment http --image=katacoda/docker-http-server:latest'
     ec k8s-master 'kubectl create -f /vagrant/bin/modules/up/Dashboard.yaml'
 }
 
@@ -67,7 +65,7 @@ function printDashboardAccess() {
 }
 
 function proxyStart() {
-    vagrant ssh k8s-master -- "nohup kubectl proxy --address 0.0.0.0 --accept-hosts '^*$'" &    
+    vagrant ssh k8s-master -- "nohup kubectl proxy --address 0.0.0.0 --accept-hosts '^*$'" & 2>&1 > /dev/null
 }
 
 function main() {
@@ -80,10 +78,11 @@ function main() {
         updateEtcHostsFile
         clusterStart
         weaveNetworkDeploy
-        joinCluster
         dashboardDeploy
         proxyStart
     fi
+
+    joinCluster
 
     bash platform-control.sh status
     printDashboardAccess
