@@ -2,7 +2,7 @@
 
 function ec() {
     echo -e "\033[0;32m| Launching to $1 command:\033[0;33m $2 \033[0m"
-    vagrant ssh "$1" -- "$2" 2>&1 > /dev/null
+    vagrant ssh "$1" -- "$2 2>&1 > /dev/null" 2>&1 > /dev/null
 }
 
 function updateEtcHostsFile() {
