@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
       node.vm.hostname = "k8s-node-#{i}"
       node.vm.provision :shell, path: "deploy/deploy.sh"
       node.vm.provider "virtualbox" do |vb|
-        vb.memory = "2048"
+        vb.memory = "1024"
         vb.cpus = "4"
         vb.name = "k8s-node-#{i}"
       end
