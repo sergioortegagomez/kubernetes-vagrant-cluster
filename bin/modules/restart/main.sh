@@ -2,7 +2,7 @@
 
 function main() {
     vagrant reload
-    bash platform-control.sh status
+    bash platformcontrol.sh status
 }
 
 function help() {

@@ -11,7 +11,7 @@ This kubernetes cluster is composed of 1 master and 5 nodes.
 ## The main script:
 
 ```console
-$ bin/platform-control.sh
+$ bin/platformcontrol.sh
 
 Kubernetes Vagrant Cluster Platform Control Script
 
@@ -22,10 +22,10 @@ Options:
  - up: platform up :)
 ```
 
-### Example: bin/platform-control.sh up
+### Example: bin/platformcontrol.sh up
 
 ```console
-$ bin/platform-control.sh up
+$ bin/platformcontrol.sh up
 
 Kubernetes Vagrant Cluster Platform Control Script
 
@@ -77,6 +77,17 @@ kubernetes-dashboard   dashboard-metrics-scraper   ClusterIP   10.96.172.214   <
 kubernetes-dashboard   kubernetes-dashboard        NodePort    10.96.119.198   <none>        443:30443/TCP            12m   k8s-app=kubernetes-dashboard
 ```
 
-Kubernetes-dashboard at: https://192.168.50.10:30443/#/login
+## Update your /etc/hosts file.
+
+```console
+[...]
+
+192.168.50.10 kubernetes
+
+[...]
+```
+
+
+Kubernetes-dashboard at: https://kubernetes:30443/#/login
 
 Enjoy!!

@@ -22,7 +22,8 @@ function dockerInstall() {
   "log-opts": {
     "max-size": "100m"
   },
-  "storage-driver": "overlay2"
+  "storage-driver": "overlay2",
+  "insecure-registries" : ["docker-registry.local"]
 }
 EOF
     mkdir -p /etc/systemd/system/docker.service.d
