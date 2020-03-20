@@ -54,15 +54,7 @@ function dashboardDeploy() {
     ec k8s-master 'kubectl create -f /vagrant/bin/modules/up/Dashboard.yaml'
 }
 
-function printDashboardAccess() {
-    SECRET_ID=$(vagrant ssh "k8s-master" -- "kubectl -n kubernetes-dashboard get secret"  | grep kubernetes-dashboard-token | awk '{print $1}')
-    ACCESS_TOKEN=$(vagrant ssh "k8s-master" -- "kubectl -n kubernetes-dashboard describe secret $SECRET_ID" | grep token: | awk '{print $2}')
-    echo
-    echo -e "[ Kubernetes Dashboard ]"
-    echo -e "Url: https://192.168.50.10:30443/#/login"
-    echo -e "AccessToken: $ACCESS_TOKEN"
-    echo
-}
+
 
 function proxyStart() {
     vagrant ssh k8s-master -- "nohup kubectl proxy --address 0.0.0.0 --accept-hosts '^*$'" & 2>&1 > /dev/null
@@ -84,8 +76,7 @@ function main() {
 
     joinCluster
 
-    bash platformcontrol.sh status
-    printDashboardAccess
+    bash platformcontrol.sh status    
 }
 
 function help() {
