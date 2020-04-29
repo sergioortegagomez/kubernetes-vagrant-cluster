@@ -74,7 +74,7 @@ function main() {
     # First time only
     IS_DEPLOYED=$(echo 'ls -la' | vagrant ssh k8s-master | grep deployed | wc -l)
     if [ ${IS_DEPLOYED} == 0 ]; then
-        bash platform-control.sh restart
+        vagrant reload
         updateEtcHostsFile
         clusterStart
         weaveNetworkDeploy
