@@ -54,10 +54,15 @@ function dashboardDeploy() {
     ec k8s-master 'kubectl create -f /vagrant/bin/modules/up/Dashboard.yaml'
 }
 
-
-
 function proxyStart() {
     vagrant ssh k8s-master -- "nohup kubectl proxy --address 0.0.0.0 --accept-hosts '^*$'" & 2>&1 > /dev/null
+}
+
+function installHelm() {
+    ec k8s-master 'curl -k https://get.helm.sh/helm-v3.3.4-linux-amd64.tar.gz -o heml-v3.3.4-linux-amd64.tar.gz'
+    ec k8s-master 'tar zxvf heml-v3.3.4-linux-amd64.tar.gz'
+    ec k8s-master 'sudo cp linux-amd64/helm /usr/local/bin/.'
+    ec k8s-master 'rm -rf linux-amd64 heml-v3.3.4-linux-amd64.tar.gz'
 }
 
 function main() {
@@ -71,6 +76,7 @@ function main() {
         clusterStart
         weaveNetworkDeploy
         dashboardDeploy
+        installHelm
         proxyStart
     fi
 
